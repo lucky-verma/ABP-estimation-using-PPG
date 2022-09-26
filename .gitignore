@@ -1,7 +1,7 @@
 # Data folders
 
 kaggle_data/
-
+*.p
 
 
 # Byte-compiled / optimized / DLL files
@@ -133,3 +133,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+other/PPG2ABP/codes/test_output_approximate.p
