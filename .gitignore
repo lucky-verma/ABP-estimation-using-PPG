@@ -134,3 +134,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 other/PPG2ABP/codes/test_output_approximate.p
+*.hdf5
+*.zip

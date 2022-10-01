@@ -33,7 +33,7 @@ def process_data():
 	except Exception as e:
 		print(e)
 
-	for k in range(1,5):					# process for the 4 different parts of the data
+	for k in range(1,2):					# process for the 4 different parts of the data
 
 		print("Processing file part {} out of 4".format(k))
 
@@ -41,7 +41,7 @@ def process_data():
 
 		ky = 'Part_' + str(k)														# key 
 
-		for i in tqdm(range(len(f[ky])),desc='Reading Records'):					# reading the records
+		for i in tqdm(range(1),desc='Reading Records'):					# reading the records
 
 			signal = []												# ppg signal
 			bp = []													# abp signal
@@ -52,6 +52,8 @@ def process_data():
 				
 				signal.append(f[f[ky][i][0]][j][0])					# ppg signal
 				bp.append(f[f[ky][i][0]][j][1])						# abp signal
+			
+			print("bp After: ", len(bp))
 
 			for j in tqdm(range(0,len(f[f[ky][i][0]])-samples_in_episode, d_samples),desc='Processing Episodes from Record {}/3000'.format(i+1)):	# computing the sbp and dbp values
 				
@@ -59,6 +61,8 @@ def process_data():
 				dbp = min(bp[j:j+samples_in_episode])    	# dbp value
 
 				output_str += '{},{},{}\n'.format(j,sbp,dbp)	# append to the csv file
+
+				print("j: ", j, "sbp: ", sbp, "dbp: ", dbp)
 
 
 			fp = open(os.path.join('processed_data','Part_{}_{}.csv'.format(k,i)),'w')		# create the csv file
