@@ -12,11 +12,13 @@ import time
 from tqdm import tqdm
 import pickle
 import os
-from keras.optimizers import Adam
 import wandb
+from keras.optimizers import Adam
 from wandb.keras import WandbCallback
 
-wandb.init(project='ABP-estimation_Kaggledata', config={"hyper": "parameter"})
+os.makedirs('wandb_cache', exist_ok=True)
+
+wandb.init(project='ABP-estimation_Kaggledata', dir="./wandb_cache", config={"hyper": "parameter"})
 
 
 def train_approximate_network():
