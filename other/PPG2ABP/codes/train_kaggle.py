@@ -13,16 +13,21 @@ from tqdm import tqdm
 import pickle
 import os
 from keras.optimizers import Adam
+import tensorflow as tf
+from tensorflow import keras
 import wandb
 from wandb.keras import WandbCallback
 
 wandb.init(project='ABP-estimation_Kaggledata', config={"hyper": "parameter"})
 
-
 def train_approximate_network():
     """
         Trains the approximate network in 10 fold cross validation manner
     """
+
+    # Create a MirroredStrategy.
+    strategy = tf.distribute.MirroredStrategy()
+    print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
 
     model_dict = {}                                             # all the different models
     model_dict['UNet'] = UNet
@@ -78,16 +83,36 @@ def train_approximate_network():
         Y_val = prepareLabel(Y_val)                                             # prepare labels for training deep supervision
 
 
+        # Open a strategy scope.
+        with strategy.scope():
 
-        mdl1 = model_dict[mdlName1](length)             # create approximation network
+            mdl1 = model_dict[mdlName1](length)             # create approximation network
 
-        # loss = mae, with deep supervision weights
-        mdl1.compile(loss='mean_absolute_error',optimizer='adam',metrics=['mean_squared_error'], loss_weights=[1., 0.9, 0.8, 0.7, 0.6])
+            # loss = mae, with deep supervision weights
+            mdl1.compile(loss='mean_absolute_error',optimizer='adam',metrics=['mean_squared_error'], loss_weights=[1., 0.9, 0.8, 0.7, 0.6])
 
 
         checkpoint1_ = ModelCheckpoint(os.path.join('models','{}_model1_fold{}.h5'.format(mdlName1,foldname)), verbose=1, monitor='val_out_loss',save_best_only=True, mode='auto')
         # train approximation network for 100 epochs
-        history1 = mdl1.fit(X_train,{'out': Y_train['out'], 'level1': Y_train['level1'], 'level2':Y_train['level2'], 'level3':Y_train['level3'] , 'level4':Y_train['level4']},epochs=100,batch_size=256,validation_data=(X_val,{'out': Y_val['out'], 'level1': Y_val['level1'], 'level2':Y_val['level2'], 'level3':Y_val['level3'] , 'level4':Y_val['level4']}),callbacks=[checkpoint1_, WandbCallback()],verbose=1)
+        history1 = mdl1.fit(X_train, {
+            'out': Y_train['out'],
+            'level1': Y_train['level1'],
+            'level2': Y_train['level2'],
+            'level3': Y_train['level3'],
+            'level4': Y_train['level4']
+        },
+                            epochs=100,
+                            batch_size=256,
+                            validation_data=(X_val, {
+                                'out': Y_val['out'],
+                                'level1': Y_val['level1'],
+                                'level2': Y_val['level2'],
+                                'level3': Y_val['level3'],
+                                'level4': Y_val['level4']
+                            }),
+                            callbacks=[checkpoint1_,
+                                        WandbCallback()],
+                            verbose=1)
 
         pickle.dump(history1, open('History/{}_model1_fold{}.p'.format(mdlName1,foldname),'wb'))    # save training history
 
@@ -102,6 +127,10 @@ def train_refinement_network():
     """
         Trains the refinement network in 10 fold cross validation manner
     """
+
+    # Create a MirroredStrategy.
+    strategy2 = tf.distribute.MirroredStrategy()
+    print('Number of devices: {}'.format(strategy2.num_replicas_in_sync))
 
     model_dict = {}                                             # all the different models
     model_dict['UNet'] = UNet
@@ -146,31 +175,27 @@ def train_refinement_network():
 
         Y_val = prepareLabel(Y_val)                                             # prepare labels for training deep supervision
 
+        # Open a strategy scope.
+        with strategy2.scope():
 
-        mdl1 = model_dict[mdlName1](length)                 # load approximation network
-        mdl1.load_weights(os.path.join('models','{}_model1_fold{}.h5'.format(mdlName1,foldname)))   # load weights
+            mdl1 = model_dict[mdlName1](length)                 # load approximation network
+            mdl1.load_weights(os.path.join('models','{}_model1_fold{}.h5'.format(mdlName1,foldname)))   # load weights
 
-        X_train = prepareDataDS(mdl1, X_train)          # prepare training data for 2nd stage, considering deep supervision
-        X_val = prepareDataDS(mdl1, X_val)              # prepare validation data for 2nd stage, considering deep supervision
+            X_train = prepareDataDS(mdl1, X_train)          # prepare training data for 2nd stage, considering deep supervision
+            X_val = prepareDataDS(mdl1, X_val)              # prepare validation data for 2nd stage, considering deep supervision
 
-        mdl1 = None                                 # garbage collection
+            mdl1 = None                                 # garbage collection
 
 
-        mdl2 = model_dict[mdlName2](length)            # create refinement network
+            mdl2 = model_dict[mdlName2](length)            # create refinement network
 
-        # loss = mse
-        mdl2.compile(loss='mean_squared_error',optimizer='adam',metrics=['mean_absolute_error'])
+            # loss = mse
+            mdl2.compile(loss='mean_squared_error',optimizer='adam',metrics=['mean_absolute_error'])
 
         checkpoint2_ = ModelCheckpoint(os.path.join('models','{}_model2_fold{}.h5'.format(mdlName2,foldname)), verbose=1, monitor='val_loss',save_best_only=True, mode='auto')
 
         # train refinement network for 100 epochs
-        history2 = mdl2.fit(X_train,
-                            Y_train['out'],
-                            epochs=100,
-                            batch_size=192,
-                            validation_data=(X_val, Y_val['out']),
-                            callbacks=[checkpoint2_,
-                                       WandbCallback()])
+        history2 = mdl2.fit(X_train,Y_train['out'],epochs=100,batch_size=192,validation_data=(X_val,Y_val['out']),callbacks=[checkpoint2_, WandbCallback()])
 
         pickle.dump(history2, open('History/{}_model2_fold{}.p'.format(mdlName2,foldname),'wb'))    # save training history
 
