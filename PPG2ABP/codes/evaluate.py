@@ -346,6 +346,7 @@ def evaluate_BHS_Standard():
 
 	plt.show()
 
+	return plt, [round(dbp_percent[0], 1), round(dbp_percent[1], 1), round(dbp_percent[2], 1)], [round(map_percent[0], 1), round(map_percent[1], 1), round(map_percent[2], 1)], [round(sbp_percent[0], 1), round(sbp_percent[1], 1), round(sbp_percent[2], 1)]
 
 def evaluate_AAMI_Standard():
 	"""
@@ -463,6 +464,8 @@ def evaluate_AAMI_Standard():
 	plt.tight_layout()
 
 	plt.show()
+
+	return plt, '| DBP | {} | {} |'.format(round(np.mean(dbps), 3), round(np.std(dbps), 3)), '| MAP | {} | {} |'.format(round(np.mean(maps), 3), round(np.std(maps), 3)), '| SBP | {} | {} |'.format(round(np.mean(sbps), 3), round(np.std(sbps), 3))
 
 
 def evaluate_BP_Classification():
@@ -659,6 +662,7 @@ def bland_altman_plot():
 		plt.ylabel('Error in Prediction (mmHg)',fontsize=14)
 		print(md+1.96*sd,md-1.96*sd)
 
+		return str(md+1.96*sd) + ' | ' +  str(md-1.96*sd)
 
 
 	dt = pickle.load(open(os.path.join('data','test.p'),'rb'))			# loading test data
@@ -705,20 +709,22 @@ def bland_altman_plot():
 	fig = plt.figure(figsize=(18,5), dpi=120)
 	plt.subplot(1,3,1)
 	print('---------DBP---------')
-	bland_altman(dbpTrues,dbpPreds)
+	ba_dbp = bland_altman(dbpTrues,dbpPreds)
 	plt.title('Bland-Altman Plot for DBP Prediction',fontsize=18)
 	
 	plt.subplot(1,3,2)
 	print('---------MAP---------')
-	bland_altman(mapTrues,mapPreds)
+	ba_map = bland_altman(mapTrues,mapPreds)
 	plt.title('Bland-Altman Plot for MAP Prediction',fontsize=18)
 	
 	plt.subplot(1,3,3)
 	print('---------SBP---------')
-	bland_altman(sbpTrues,sbpPreds)	
+	ba_sbp = bland_altman(sbpTrues,sbpPreds)	
 	plt.title('Bland-Altman Plot for SBP Prediction',fontsize=18)
 	
 	plt.show()
+
+	return plt, ba_dbp, ba_map, ba_sbp
 	
 
 def regression_plot():
@@ -798,6 +804,7 @@ def regression_plot():
 	print('SBP')
 	print(scipy.stats.linregress(sbpTrues,sbpPreds))
 	
+	return plt, scipy.stats.linregress(dbpTrues,dbpPreds), scipy.stats.linregress(mapTrues,mapPreds), scipy.stats.linregress(sbpTrues,sbpPreds)
 
 
 def main():
