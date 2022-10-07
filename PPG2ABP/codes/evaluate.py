@@ -15,7 +15,7 @@ import seaborn as sns
 sns.set()
 
 
-def predicting_ABP_waveform():
+def predicting_ABP_waveform(indix: int = 0):
 	"""
 		An interactive way to predict the ABP waveform from PPG signal
 		from the test data.
@@ -38,58 +38,102 @@ def predicting_ABP_waveform():
 
 	Y_test_pred = pickle.load(open('test_output.p', 'rb'))	# loading precomputed output from refinement network
 
-	while(True):			# interactive cli
+	# while(True):			# interactive cli
 
-		indix = int(input(
-			'Please input a record from 1 to 27260 to visualize.\nInput -1 to quit.\n> '))
+	# 	indix = int(input(
+	# 		'Please input a record from 1 to 27260 to visualize.\nInput -1 to quit.\n> '))
 
-		if(indix == -1):			# exit
-			break
+	# 	if(indix == -1):			# exit
+	# 		break
 
-		if(indix < 1 or indix > 27260):			# wrong index
-			continue
+	# 	if(indix < 1 or indix > 27260):			# wrong index
+	# 		continue
 
-		indix -= 1
+	# 	indix -= 1
 
-		ppg_signal = X_test[indix] * max_ppg + min_ppg											# input ppg signal
-		abp_signal_pred_approximate = Y_test_pred_approximate[indix] * max_abp + min_abp		# abp waveform approx.
-		abp_signal_pred = Y_test_pred[indix] * max_abp + min_abp								# abp waveform predicted
-		abp_signal_ground_truth = Y_test[indix] * max_abp + min_abp								# abp waveform ground truth
+	# 	ppg_signal = X_test[indix] * max_ppg + min_ppg											# input ppg signal
+	# 	abp_signal_pred_approximate = Y_test_pred_approximate[indix] * max_abp + min_abp		# abp waveform approx.
+	# 	abp_signal_pred = Y_test_pred[indix] * max_abp + min_abp								# abp waveform predicted
+	# 	abp_signal_ground_truth = Y_test[indix] * max_abp + min_abp								# abp waveform ground truth
 
-		time_scale = np.arange(0, 8.192, 8.192/len(ppg_signal))									# series for time axis
+	# 	time_scale = np.arange(0, 8.192, 8.192/len(ppg_signal))									# series for time axis
 
-		plt.figure(figsize=(30, 15))
+	# 	plt.figure(figsize=(30, 15))
 
-		plt.subplot(5, 1, 1)
-		plt.plot(time_scale, ppg_signal, c='k', linewidth=2)
-		plt.title('Input PPG Signal', fontsize=20)
+	# 	plt.subplot(5, 1, 1)
+	# 	plt.plot(time_scale, ppg_signal, c='k', linewidth=2)
+	# 	plt.title('Input PPG Signal', fontsize=20)
 
-		plt.subplot(5, 1, 2)
-		plt.plot(time_scale, abp_signal_pred_approximate, c='r', linewidth=2)
-		plt.ylabel('ABP (mmHg)', fontsize=15)
-		plt.title('Output of Approximate Network', fontsize=20)
+	# 	plt.subplot(5, 1, 2)
+	# 	plt.plot(time_scale, abp_signal_pred_approximate, c='r', linewidth=2)
+	# 	plt.ylabel('ABP (mmHg)', fontsize=15)
+	# 	plt.title('Output of Approximate Network', fontsize=20)
 
-		plt.subplot(5, 1, 3)
-		plt.plot(time_scale, abp_signal_pred, c='b', linewidth=2)
-		plt.ylabel('ABP (mmHg)', fontsize=15)
-		plt.title('Output of Refinement Network', fontsize=20)
+	# 	plt.subplot(5, 1, 3)
+	# 	plt.plot(time_scale, abp_signal_pred, c='b', linewidth=2)
+	# 	plt.ylabel('ABP (mmHg)', fontsize=15)
+	# 	plt.title('Output of Refinement Network', fontsize=20)
 
-		plt.subplot(5, 1, 4)
-		plt.plot(time_scale, abp_signal_ground_truth, c='g', linewidth=2)
-		plt.ylabel('ABP (mmHg)', fontsize=15)
-		plt.title('Ground Truth', fontsize=20)
+	# 	plt.subplot(5, 1, 4)
+	# 	plt.plot(time_scale, abp_signal_ground_truth, c='g', linewidth=2)
+	# 	plt.ylabel('ABP (mmHg)', fontsize=15)
+	# 	plt.title('Ground Truth', fontsize=20)
 
-		plt.subplot(5, 1, 5)
-		plt.plot(time_scale, abp_signal_pred_approximate, c='r', label='Output Level 1', linewidth=2)
-		plt.plot(time_scale, abp_signal_pred, c='b', label='Output Level 2', linewidth=2)
-		plt.plot(time_scale, abp_signal_ground_truth, c='g', label='Ground Truth', linewidth=2)
-		plt.title('Comparison', fontsize=20)
-		plt.xlabel('Time (sec)', fontsize=15)
-		plt.ylabel('ABP (mmHg)', fontsize=15)
+	# 	plt.subplot(5, 1, 5)
+	# 	plt.plot(time_scale, abp_signal_pred_approximate, c='r', label='Output Level 1', linewidth=2)
+	# 	plt.plot(time_scale, abp_signal_pred, c='b', label='Output Level 2', linewidth=2)
+	# 	plt.plot(time_scale, abp_signal_ground_truth, c='g', label='Ground Truth', linewidth=2)
+	# 	plt.title('Comparison', fontsize=20)
+	# 	plt.xlabel('Time (sec)', fontsize=15)
+	# 	plt.ylabel('ABP (mmHg)', fontsize=15)
 
-		plt.tight_layout()
+	# 	plt.tight_layout()
 
-		plt.show()
+	# 	plt.show()
+
+	indix -= 1
+
+	ppg_signal = X_test[indix] * max_ppg + min_ppg											# input ppg signal
+	abp_signal_pred_approximate = Y_test_pred_approximate[indix] * max_abp + min_abp		# abp waveform approx.
+	abp_signal_pred = Y_test_pred[indix] * max_abp + min_abp								# abp waveform predicted
+	abp_signal_ground_truth = Y_test[indix] * max_abp + min_abp								# abp waveform ground truth
+
+	time_scale = np.arange(0, 8.192, 8.192/len(ppg_signal))									# series for time axis
+
+	plt.figure(figsize=(30, 15))
+
+	plt.subplot(5, 1, 1)
+	plt.plot(time_scale, ppg_signal, c='k', linewidth=2)
+	plt.title('Input PPG Signal', fontsize=20)
+
+	plt.subplot(5, 1, 2)
+	plt.plot(time_scale, abp_signal_pred_approximate, c='r', linewidth=2)
+	plt.ylabel('ABP (mmHg)', fontsize=15)
+	plt.title('Output of Approximate Network', fontsize=20)
+
+	plt.subplot(5, 1, 3)
+	plt.plot(time_scale, abp_signal_pred, c='b', linewidth=2)
+	plt.ylabel('ABP (mmHg)', fontsize=15)
+	plt.title('Output of Refinement Network', fontsize=20)
+
+	plt.subplot(5, 1, 4)
+	plt.plot(time_scale, abp_signal_ground_truth, c='g', linewidth=2)
+	plt.ylabel('ABP (mmHg)', fontsize=15)
+	plt.title('Ground Truth', fontsize=20)
+
+	plt.subplot(5, 1, 5)
+	plt.plot(time_scale, abp_signal_pred_approximate, c='r', label='Output Level 1', linewidth=2)
+	plt.plot(time_scale, abp_signal_pred, c='b', label='Output Level 2', linewidth=2)
+	plt.plot(time_scale, abp_signal_ground_truth, c='g', label='Ground Truth', linewidth=2)
+	plt.title('Comparison', fontsize=20)
+	plt.xlabel('Time (sec)', fontsize=15)
+	plt.ylabel('ABP (mmHg)', fontsize=15)
+
+	plt.tight_layout()
+
+	plt.show()
+
+	return plt
 
 
 def evaluate_BHS_Standard():
