@@ -1,0 +1,5 @@
+processed_data/
+data/
+raw_data/
+models/
+*.p

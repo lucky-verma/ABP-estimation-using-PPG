@@ -1,2 +1,4 @@
 *.mat
+*.csv
+data_ADA
 wandb_cache
