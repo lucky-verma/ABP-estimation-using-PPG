@@ -1,7 +1,8 @@
 # Data folders
 
 kaggle_data/
-tanzem_data/tanzen_keys.json
+tanzen_data/tanzen_keys.json
+tanzen_data/tanzen_data/*
 *.p
 
 
